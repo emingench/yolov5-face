@@ -31,3 +31,4 @@ pandas
 thop  # FLOPs computation
 jupyter-flex
 Voila
+Pillow 

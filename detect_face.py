@@ -3,11 +3,14 @@ import argparse
 import time
 from pathlib import Path
 
+import io
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
+import numpy as np
 import copy
+from PIL import Image
 
 from models.experimental import attempt_load
 from utils.datasets import letterbox
@@ -70,15 +73,15 @@ def show_results(img, xywh, conf, landmarks, class_num):
 
 
 
-def detect_one(model, image_path, device):
+def detect_one(model , img_data, device ):
     # Load model
     img_size = 2048
     conf_thres = 0.3
     iou_thres = 0.5
 
-    orgimg = cv2.imread(image_path)  # BGR
+    orgimg = np.array(Image.open(io.BytesIO(img_data)).convert('RGB'))
     img0 = copy.deepcopy(orgimg)
-    assert orgimg is not None, 'Image Not Found ' + image_path
+    assert orgimg is not None, 'Image Not Found ' 
     h0, w0 = orgimg.shape[:2]  # orig hw
     r = img_size / max(h0, w0)  # resize image to img_size
     if r != 1:  # always resize down, only resize up if training with augmentation
@@ -132,6 +135,7 @@ def detect_one(model, image_path, device):
                 orgimg = show_results(orgimg, xywh, conf, landmarks, class_num)
 
     cv2.imwrite('result.jpg', orgimg)
+    return orgimg
 
 
 
@@ -139,7 +143,7 @@ def detect_one(model, image_path, device):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='runs/train/exp5/weights/last.pt', help='model.pt path(s)')
-    parser.add_argument('--image', type=str, default='data/images/test.jpg', help='source')  # file/folder, 0 for webcam
+    #parser.add_argument('--image', type=str, default='data/images/test.jpg', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     opt = parser.parse_args()
     print(opt)
